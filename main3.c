@@ -42,7 +42,8 @@ void telalogin(){
     //char *senha = calloc(30, sizeof(char));
     //char *senha1 = calloc(30, sizeof(char));
     system("clear");
-    while(resp){
+    inp[0] = '-1';
+    while(inp[0] != '0'){
         
         printf("GAME TYPING\n\n"
            "[ 1 ] Entrar\n"
@@ -50,6 +51,9 @@ void telalogin(){
            "[ 0 ] Sair\n\n> ");
         
         fgets(inp, 16, stdin);
+        if(inp[0] == '0'){
+            exit(0);
+        }
         resp = strtoull(inp, NULL, 16);
         
         if(resp > 2 || resp < 0){
@@ -57,11 +61,11 @@ void telalogin(){
             system("clear");
             continue;
         }
-
+        system("clear");
         switch (resp)
         {
         case 1:
-            printf("\nNome: ");
+            printf("Nome: ");
             fgets(nome, 127, stdin);
             //printf("\nSenha: ");
             //fgets(senha, 29, stdin);
@@ -125,29 +129,42 @@ void telamenu(){
     char inp[16];
     FILE *arq;
     system("clear");
-    while(resp){
+    inp[0] = '-1';
+    while(inp[0] != '0'){
+        system("clear");
+        
         printf("MENU\n\n"
             "[ 1 ] Partida aleatoria\n"
-            "[ 2 ] Escolher texto\n"
+            "[ 2 ] Adicionar texto\n"
             "[ 3 ] Estatisticas\n\n"
             "[ 0 ] Sair do programa\n\n> ");
         
         fgets(inp, 16, stdin);
         resp = strtoull(inp, NULL, 16);
-        if(resp > 2 || resp < 0){
+        
+      
+       
+
+        if(resp > 3 || resp < 0){
             resp = -1;
             system("clear");
             continue;
         }
+
+
         int quant = -2, txtrandom;
         DIR *dp;
         struct dirent *ep;
         srand(time(NULL));
         char *texto = calloc(32, sizeof(char));
-        char *textoarq = calloc(1024, sizeof(char));
+        char *textoarq = calloc(5000, sizeof(char));
         char chartemp[32] = "./textos/";
         char *temp = calloc(32, sizeof(char));
         texto = &chartemp;
+
+        
+        char *resp3 = calloc(5, sizeof(char));
+
         switch (resp)
         {
         case 1:
@@ -156,37 +173,99 @@ void telamenu(){
 
             if(dp != NULL){
                 while(ep = readdir(dp)){
-                    quant = quant +1;
+                quant = quant +1;
 
                 }
+                
                 txtrandom = (rand() % quant)+1;
                 temp = itoa(txtrandom, temp);
                 strcat(texto, temp);
                 strcat(texto, ".txt");
-                
+                    
                 arq = fopen(texto, "r");
-                
+                    
                 partida(arq, textoarq);
+                printf("\nDigite qualquer tecla para continuar\n> ");
+                fgets(resp3, 5, stdin);
+                
 
-                /*
-                while(!feof(arq)){
-                    fgets(textoarq, 1024, arq);
-                    printf("%s\n", textoarq);
 
-                } */
-
-                closedir(dp);
                 fclose(arq);
+                closedir(dp);
+                    
+            }
+                
+            else{
+                printf("Erro ao abrir o diretorio!");
+            }
+            
+            sleep(3);
+            system("clear");
+            break;
+        
+
+        case 2:
+            system("clear");
+            dp = opendir("./textos");
+
+            if(dp != NULL){
+                while(ep = readdir(dp)){
+                quant = quant +1;
+                }
+                temp = itoa(quant+1, temp);
+                strcat(texto, temp);
+                strcat(texto, ".txt");
+                    
+                arq = fopen(texto, "w");
+                printf("Para adicionar um texto voce devera inserir linha por linha.\n\n");
+                int cont2 = 1;
+                char *resp2 = malloc(5 * sizeof(char));
+                
+                *resp2 = '1';
+
+                while(strcmp(resp2, "0") != 0){
+                    char *textoarq2 = calloc(1024, sizeof(char));
+                    printf("Insira aqui a %d linha: ", cont2);
+                    fgets(textoarq2, 1024, stdin);
+                    strncat(textoarq, textoarq2, sizeof(textoarq2)-1);
+                    
+                    
+                    printf("\n");
+                    printf("Digite qualquer tecla para continuar ou 0 para finalizar\n> ");
+                    fgets(resp2, 5, stdin);
+                    
+                    if(strcmp(resp2, "0\n")==0){
+                        fprintf(arq, "%s", textoarq);
+                        break;
+                    }
+                    cont2++;
+                    *resp2 = '1';
+                    printf("\n");
+
+                    
+                }
+                sleep(2);
+                system("clear");
+                printf("\nTexto adicionado com sucesso!\n");
+                
+         
+            
             }
             else{
                 printf("Erro ao abrir o diretorio!");
             }
             sleep(3);
             system("clear");
+            fclose(arq);
+            closedir(dp);
+            
             break;
-        
+
         
         }
+
+        
+
         
     }
 
@@ -215,11 +294,12 @@ void partida(FILE *arq, char *textoarq){
     tempo = difftime(time_fim, time_ini);
     tempo = tempo/60;
     palavras += 1;
+    system("clear");
     printf("%.2f minutos\n", tempo);
     printf("%d palavras\n", palavras);
     vel = palavras / tempo;
-    printf("%.2f WPM\n", vel);
-    sleep(10);
+    printf("%.2f WPM (palavras por minuto)\n", vel);
+    
 
 }
 
@@ -231,5 +311,3 @@ int main(){
 
     return 0;
 }
-
-
