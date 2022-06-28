@@ -161,7 +161,7 @@ void telamenu(){
         char chartemp[32] = "./textos/";
         char *temp = calloc(32, sizeof(char));
         texto = &chartemp;
-
+        int led=0;
         
         char *resp3 = calloc(5, sizeof(char));
 
@@ -234,9 +234,18 @@ void telamenu(){
                     printf("Digite qualquer tecla para continuar ou 0 para finalizar\n> ");
                     fgets(resp2, 5, stdin);
                     
-                    if(strcmp(resp2, "0\n")==0){
+                    if(strcmp(resp2, "0\n")==0 && cont2 > 1){
                         fprintf(arq, "%s", textoarq);
                         break;
+                    }
+                    else{
+                        if(strcmp(resp2, "0\n")==0 && cont2 == 1){
+                            system("clear");
+                            printf("Nao eh permitido adicionar apenas uma linha.\n");
+                            sleep(2);
+                            led =1;
+                            break;
+                        }
                     }
                     cont2++;
                     *resp2 = '1';
@@ -246,7 +255,8 @@ void telamenu(){
                 }
                 sleep(2);
                 system("clear");
-                printf("\nTexto adicionado com sucesso!\n");
+                
+                if(led == 0) printf("\nTexto adicionado com sucesso!\n");
                 
          
             
@@ -277,8 +287,17 @@ void partida(FILE *arq, char *textoarq){
     char *txt = calloc(1024, sizeof(char));
     int cont, palavras=0;
     time_ini = time(NULL);
+    int vidas = 3, led=0;
     while(!feof(arq)){
         system("clear");
+        
+        printf("VIDAS: ");
+        for(int i=vidas; i>0; i--){
+            printf("\U0001F499 ");
+        }
+        printf("\n\n");
+
+        
         cont = 0;
         fgets(textoarq, 1024, arq);
         for(int i=0; textoarq[i]!='\0'; i++){
@@ -289,16 +308,34 @@ void partida(FILE *arq, char *textoarq){
         palavras = palavras + cont;
         printf("%s\n\n> ", textoarq);
         fgets(txt, 1024, stdin);
+        if(strcasecmp(textoarq, txt) != 0){
+            if(vidas == 1){
+                system("clear");
+                printf("FIM DE JOGO!\n\nVoce ficou sem vidas\n");
+                led =1;
+                sleep(4);
+                break;
+            }
+            vidas = vidas - 1;
+        }
     }
-    time_fim = time(NULL);
-    tempo = difftime(time_fim, time_ini);
-    tempo = tempo/60;
-    palavras += 1;
-    system("clear");
-    printf("%.2f minutos\n", tempo);
-    printf("%d palavras\n", palavras);
-    vel = palavras / tempo;
-    printf("%.2f WPM (palavras por minuto)\n", vel);
+
+    if(led == 0){
+        printf("VIDAS: ");
+        for(int i=vidas; i>0; i--){
+            printf("\U0001F499 ");
+        }
+        printf("\n\n");
+        time_fim = time(NULL);
+        tempo = difftime(time_fim, time_ini);
+        tempo = tempo/60;
+        palavras += 1;
+        system("clear");
+        printf("%.2f minutos\n", tempo);
+        printf("%d palavras\n", palavras);
+        vel = palavras / tempo;
+        printf("%.2f WPM (palavras por minuto)\n", vel);
+    }
     
 
 }
