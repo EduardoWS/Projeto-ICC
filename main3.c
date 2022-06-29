@@ -73,10 +73,8 @@ char *cores(int n){
     return cor;
 }
 
-void telalogin(){
+char *telalogin(){
     
-    
-    //char *cor = calloc(20, sizeof(char));
     
     int resp = -1, led = 0;
     char inp[16];
@@ -95,7 +93,7 @@ void telalogin(){
             "===========================%s\n\n"
             "%s[ 1 ] Entrar\n"
             "[ 2 ] Cadastrar\n\n"
-            "[ 0 ] Sair%s\n\n%s> %s", cores(1), cores(0), cores(2), cores(0), cores(3), cores(0));
+            "[ 0 ] Sair do programa%s\n\n%s> %s", cores(1), cores(0), cores(2), cores(0), cores(3), cores(0));
         
         fgets(inp, 16, stdin);
         if(inp[0] == '0'){
@@ -170,10 +168,10 @@ void telalogin(){
         if(led == 1) break;
     }
 
-
+    return nome;
 }
 
-void telamenu(){
+void telamenu(char *nome){
 
     int resp = -1;
     char inp[16];
@@ -189,7 +187,7 @@ void telamenu(){
             "===========================%s\n\n"
             "%s[ 1 ] Partida aleatoria\n"
             "[ 2 ] Adicionar texto\n"
-            "[ 3 ] Ranking\n\n"
+            "[ 3 ] Estatisticas\n\n"
             "[ 0 ] Sair%s\n\n%s> %s", cores(1), cores(0), cores(2), cores(0), cores(3), cores(0));
         
         fgets(inp, 16, stdin);
@@ -197,7 +195,8 @@ void telamenu(){
         
         if(inp[0] == '0'){
             saindo(0);
-            exit(0);
+            inp[0] = '-1';
+            telalogin();
         }
       
        
@@ -241,7 +240,8 @@ void telamenu(){
                     
                 arq = fopen(texto, "r");
                     
-                partida(arq, textoarq);
+                partida(arq, textoarq, nome);
+
                 printf("\n%sDigite qualquer tecla para continuar%s\n\n%s> %s", cores(1), cores(0), cores(3), cores(0));
                 fgets(resp3, 5, stdin);
                 
@@ -339,16 +339,178 @@ void telamenu(){
             break;
 
         
+
+        case 3:
+
+            system("clear");
+
+            le_pontos(nome);
+
+
+
+            break;
+
         }
 
-        
 
         
     }
 
 }
 
-void partida(FILE *arq, char *textoarq){
+void grava_pontos(int score, float wpm, char *nome, int vidas){
+
+    system("ls ./scores/ > output.txt");
+    
+    FILE *out = fopen("output.txt", "r");
+    if (out == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    char *local = calloc(128, sizeof(char));
+    char *nome1 = calloc(128, sizeof(char));
+    strncat(nome1, nome, strlen(nome)-1);
+    strcat(nome1, ".txt\n");
+    //printf("%s\n", nome1);
+    char temp[50] = "./scores/";
+    local = &temp;
+    
+    
+    int score1=0;
+    float wpm1=0;
+
+    int led=0;
+
+    //printf("%d\n", strlen(nome));
+    strncat(local, nome, strlen(nome)-1);
+    strcat(local, ".txt");
+    //printf("%s\n", local);
+    char *nome2 = calloc(128, sizeof(char));
+    while(!feof(out)){
+        
+        fgets(nome2, 128, out);
+        //printf("%s\n", nome2);
+        if(strcmp(nome1, nome2)==0){
+            //printf("teste");
+            led = 1;
+            break;
+        }
+    }
+
+    
+    
+
+    if(led==1){
+        FILE *arq2 = fopen(local, "r");
+        fscanf(arq2, "%d %f", &score1, &wpm1);
+        fclose(arq2);
+        
+        
+        score += score1;
+        
+        if(vidas != 3){
+            wpm = wpm1;
+        }
+        else{
+            if(wpm1>wpm){
+                wpm = wpm1;
+            }
+        }
+        FILE *arq = fopen(local, "w");
+        fprintf(arq, "%d %f", score, wpm);
+        fclose(arq);
+    }
+    else{
+        if(vidas != 3){
+            wpm = 0;
+        }
+        FILE *arq = fopen(local, "w");
+        fprintf(arq, "%d %f", score, wpm);
+        fclose(arq);
+    }
+    
+
+    
+    fclose(out);
+    
+}
+
+
+void le_pontos(char *nome){
+
+    system("ls ./scores/ > output.txt");
+
+    FILE *out = fopen("output.txt", "r");
+    if (out == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    char *local = calloc(128, sizeof(char));
+    char *nome1 = calloc(128, sizeof(char));
+    strncat(nome1, nome, strlen(nome)-1);
+    strcat(nome1, ".txt\n");
+    //printf("%s\n", nome1);
+    char temp[50] = "./scores/";
+    local = &temp;
+    
+    
+    int score1=0;
+    float wpm1=0;
+
+    int led=0;
+
+    //printf("%d\n", strlen(nome));
+    strncat(local, nome, strlen(nome)-1);
+    strcat(local, ".txt");
+    //printf("%s\n", local);
+    char *nome2 = calloc(128, sizeof(char));
+    while(!feof(out)){
+        
+        fgets(nome2, 128, out);
+        //printf("%s\n", nome2);
+        if(strcmp(nome1, nome2)==0){
+            //printf("teste");
+            led = 1;
+            break;
+        }
+    }
+
+    
+    
+
+    if(led==1){
+        FILE *arq2 = fopen(local, "r");
+        char resp[16];
+        fscanf(arq2, "%d %f", &score1, &wpm1);
+        printf("         \033[1;36mESTATISTICAS\n"
+            "==============================\033[m\n\033[1;32mJogador: %s\n"
+            "\tSCORE: %d\n"
+            "\tWPM: %.2f\n\n"
+            "Velocidade ideal: 65 - 70 WPM\033[m\n"
+            "\033[1;36m==============================\033[m\n", nome, score1, wpm1
+        );
+        printf("\n\nDigite qualquer tecla para voltar\n%s> %s", cores(3), cores(0));
+        fgets(resp, 16, stdin);
+        fclose(out);
+        fclose(arq2);
+
+    }
+    else{
+        printf("%sVoce ainda nao possui estatisticas salvas%s\n", cores(3), cores(0));
+        sleep(3);
+    }
+    
+
+    
+    
+}
+
+
+
+void partida(FILE *arq, char *textoarq, char *nome){
     time_t time_ini, time_fim;
     float tempo, vel;
     char *txt = calloc(1024, sizeof(char));
@@ -419,6 +581,7 @@ void partida(FILE *arq, char *textoarq){
         );
         
         printf("\n================================\n");
+        grava_pontos(score, vel, nome, vidas);
     }
     
 
@@ -426,9 +589,10 @@ void partida(FILE *arq, char *textoarq){
 
 int main(){
 
-    telalogin();
+    char *nome = calloc(128, sizeof(char));
+    nome = telalogin();
 
-    telamenu();
+    telamenu(nome);
 
     return 0;
 }
